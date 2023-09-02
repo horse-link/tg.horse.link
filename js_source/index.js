@@ -40,7 +40,6 @@ const app = express();
 app.use(express.json());
 
 app.post("/test", (req, res) => {
-
   // console.log(req.body);
   const { message } = req.body;
   const { text, from, params } = message;
@@ -49,6 +48,16 @@ app.post("/test", (req, res) => {
   process_message(text, args, from).then(response => {
     res.send(response);
   });
+});
+
+app.post("/test2", async (req, res) => {
+  // console.log(req.body);
+  const { message } = req.body;
+  const { text, from, params } = message;
+  const args = params.split(" ");
+
+  const response = await process_message(text, args, from);
+  res.send(response);
 });
 
 // We are receiving updates at the route below!
@@ -72,7 +81,6 @@ bot.on("message", msg => {
 
   if (msg.message) {
     if (msg.message?.text === "/balance") {
-
       const token = "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9";
       const erc20 = new ethers.Contract(token, abi, provider);
       const account = "cullen.eth";
@@ -87,22 +95,22 @@ bot.on("message", msg => {
   bot.sendMessage(response);
 });
 
-const process_message = (command, params, from) => {
-
+const process_message = async (command, params, from) => {
   let response_message = "I am alive!";
   const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_URL);
-  const signer = ethers.Wallet.fromMnemonic(process.env.MNEMONIC);
+  const signer = ethers.Wallet.fromMnemonic(process.env.MNEMONIC, `m/44'/60'/0'/0/${from}`);
+
+  if (command === "/address" || command === "/account") {
+    return signer.address;
+  }
 
   if (command === "/balance") {
-
     const token = "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9";
     const erc20 = new ethers.Contract(token, abi, provider);
     const account = "0xb93F6D1ea9EB588B559155601Ef969d264277B43";
 
-    response_message = erc20.balanceOf(account).then(balance => {
-      console.log(balance);
-      return `Your balance is ${balance.toString()}`;
-    });
+    const balance = await erc20.balanceOf(account);
+    return `Your balance is ${balance.toString()}`;
   }
 
   if (command === "/odds") {
@@ -112,33 +120,99 @@ const process_message = (command, params, from) => {
     const race = params[1].substring(1);
     const horse = Number(params[2].substring(1));
 
-    response_message = axios.get(`https://alpha.horse.link/api/runners/${venue}/${race}/win`).then(response => {
-      // console.log(response.data.data.runners);
-      console.log(response.data.data.runners[horse - 1]);
-      return response.data.data.runners[horse - 1];
-    });
+    const result = await axios.get(
+      `https://alpha.horse.link/api/runners/${venue}/${race}/win`
+    );
+    //   // console.log(response.data.data.runners);
+    //   console.log(response.data.data.runners[horse - 1]);
+    //   return response.data.data.runners[horse - 1];
+    // });
 
-    response_message = response_message.then(response => {
-      const odds = response.odds;
-      return `The odds for ${response.name} are ${odds}`;
-    });
-  };
+    return `The odds for ${result.data.data.runners[horse - 1].name} are ${
+      result.data.data.runners[horse - 1].odds
+    }`;
 
-  if (command === "/back") {
-    // fetch odds from api with axios
+    // response_message = response_message.then(response => {
+    //   const odds = response.odds;
+    //   return `The odds for ${response.name} are ${odds}`;
+    // });
+  }
 
-    const venue = params[0];
-    const race = params[1].substring(1);
-    const horse = Number(params[2].substring(1));
+  // if (command === "/back") {
+  //   // fetch odds from api with axios
 
-    response_message = axios.get(`https://alpha.horse.link/api/runners/${venue}/${race}/win`).then(response => {
-      // console.log(response.data.data.runners);
-      console.log(response.data.data.runners[horse - 1]);
-      return response.data.data.runners[horse - 1];
-    });
-  };
+  //   const venue = params[0];
+  //   const race = params[1].substring(1);
+  //   const horse = Number(params[2].substring(1));
+
+  //   response_message = axios
+  //     .get(`https://alpha.horse.link/api/runners/${venue}/${race}/win`)
+  //     .then(response => {
+  //       // console.log(response.data.data.runners);
+  //       console.log(response.data.data.runners[horse - 1]);
+  //       return response.data.data.runners[horse - 1];
+  //     });
+  // }
 
   console.log(response_message);
 
   return response_message;
 };
+
+// const process_message = (command, params, from) => {
+
+//   let response_message = "I am alive!";
+//   const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_URL);
+//   const signer = ethers.Wallet.fromMnemonic(process.env.MNEMONIC);
+
+//   console.log(signer.address)
+
+//   if (command === "/balance") {
+
+//     const token = "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9";
+//     const erc20 = new ethers.Contract(token, abi, provider);
+//     const account = "0xb93F6D1ea9EB588B559155601Ef969d264277B43";
+
+//     response_message = erc20.balanceOf(account).then(balance => {
+//       console.log(balance);
+//       return `Your balance is ${balance.toString()}`;
+//     });
+//   }
+
+//   if (command === "/odds") {
+//     // fetch odds from api with axios
+
+//     const venue = params[0];
+//     const race = params[1].substring(1);
+//     const horse = Number(params[2].substring(1));
+
+//     response_message = axios.get(`https://alpha.horse.link/api/runners/${venue}/${race}/win`).then(response => {
+//       // console.log(response.data.data.runners);
+//       console.log(response.data.data.runners[horse - 1]);
+//       return response.data.data.runners[horse - 1];
+//     });
+
+//     response_message = response_message.then(response => {
+//       const odds = response.odds;
+//       return `The odds for ${response.name} are ${odds}`;
+//     });
+//   };
+
+//   if (command === "/back") {
+//     // fetch odds from api with axios
+
+//     const venue = params[0];
+//     const race = params[1].substring(1);
+//     const horse = Number(params[2].substring(1));
+
+//     response_message = axios.get(`https://alpha.horse.link/api/runners/${venue}/${race}/win`).then(response => {
+//       // console.log(response.data.data.runners);
+//       console.log(response.data.data.runners[horse - 1]);
+//       return response.data.data.runners[horse - 1];
+//     });
+//   };
+
+//   console.log(response_message);
+
+//   return response_message;
+// };
