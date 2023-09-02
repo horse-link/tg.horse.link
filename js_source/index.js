@@ -19,6 +19,347 @@ const abi = [
   "event Transfer(address indexed from, address indexed to, uint amount)"
 ];
 
+const market_abi = [
+  {
+    inputs: [
+      {
+        components: [
+          {
+            internalType: "bytes16",
+            name: "nonce",
+            type: "bytes16"
+          },
+          {
+            internalType: "bytes16",
+            name: "propositionId",
+            type: "bytes16"
+          },
+          {
+            internalType: "bytes16",
+            name: "marketId",
+            type: "bytes16"
+          },
+          {
+            internalType: "uint256",
+            name: "wager",
+            type: "uint256"
+          },
+          {
+            internalType: "uint256",
+            name: "odds",
+            type: "uint256"
+          },
+          {
+            internalType: "uint256",
+            name: "close",
+            type: "uint256"
+          },
+          {
+            internalType: "uint256",
+            name: "end",
+            type: "uint256"
+          },
+          {
+            components: [
+              {
+                internalType: "uint8",
+                name: "v",
+                type: "uint8"
+              },
+              {
+                internalType: "bytes32",
+                name: "r",
+                type: "bytes32"
+              },
+              {
+                internalType: "bytes32",
+                name: "s",
+                type: "bytes32"
+              }
+            ],
+            internalType: "struct SignatureLib.Signature",
+            name: "signature",
+            type: "tuple"
+          }
+        ],
+        internalType: "struct IMarket.Back",
+        name: "backData",
+        type: "tuple"
+      }
+    ],
+    name: "back",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256"
+      }
+    ],
+    stateMutability: "nonpayable",
+    type: "function"
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint64",
+        name: "index",
+        type: "uint64"
+      }
+    ],
+    name: "getBetByIndex",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256"
+      },
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256"
+      },
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256"
+      },
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256"
+      },
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool"
+      },
+      {
+        internalType: "bytes16",
+        name: "",
+        type: "bytes16"
+      },
+      {
+        internalType: "bytes16",
+        name: "",
+        type: "bytes16"
+      }
+    ],
+    stateMutability: "view",
+    type: "function"
+  },
+  {
+    inputs: [],
+    name: "getCount",
+    outputs: [
+      {
+        internalType: "uint64",
+        name: "",
+        type: "uint64"
+      }
+    ],
+    stateMutability: "view",
+    type: "function"
+  },
+  {
+    inputs: [],
+    name: "getInPlayCount",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256"
+      }
+    ],
+    stateMutability: "view",
+    type: "function"
+  },
+  {
+    inputs: [],
+    name: "getMargin",
+    outputs: [
+      {
+        internalType: "uint8",
+        name: "",
+        type: "uint8"
+      }
+    ],
+    stateMutability: "view",
+    type: "function"
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "wager",
+        type: "uint256"
+      },
+      {
+        internalType: "uint256",
+        name: "odds",
+        type: "uint256"
+      },
+      {
+        internalType: "bytes16",
+        name: "propositionId",
+        type: "bytes16"
+      },
+      {
+        internalType: "bytes16",
+        name: "marketId",
+        type: "bytes16"
+      }
+    ],
+    name: "getOdds",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256"
+      }
+    ],
+    stateMutability: "view",
+    type: "function"
+  },
+  {
+    inputs: [],
+    name: "getOracleAddress",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address"
+      }
+    ],
+    stateMutability: "view",
+    type: "function"
+  },
+  {
+    inputs: [],
+    name: "getOwner",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address"
+      }
+    ],
+    stateMutability: "view",
+    type: "function"
+  },
+  {
+    inputs: [
+      {
+        internalType: "bytes16",
+        name: "propositionId",
+        type: "bytes16"
+      },
+      {
+        internalType: "bytes16",
+        name: "marketId",
+        type: "bytes16"
+      },
+      {
+        internalType: "uint256",
+        name: "wager",
+        type: "uint256"
+      },
+      {
+        internalType: "uint256",
+        name: "odds",
+        type: "uint256"
+      }
+    ],
+    name: "getPotentialPayout",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256"
+      }
+    ],
+    stateMutability: "view",
+    type: "function"
+  },
+  {
+    inputs: [],
+    name: "getTotalExposure",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256"
+      }
+    ],
+    stateMutability: "view",
+    type: "function"
+  },
+  {
+    inputs: [],
+    name: "getTotalInPlay",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256"
+      }
+    ],
+    stateMutability: "view",
+    type: "function"
+  },
+  {
+    inputs: [],
+    name: "getVaultAddress",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address"
+      }
+    ],
+    stateMutability: "view",
+    type: "function"
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint64",
+        name: "index",
+        type: "uint64"
+      }
+    ],
+    name: "refund",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function"
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint64",
+        name: "index",
+        type: "uint64"
+      }
+    ],
+    name: "settle",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function"
+  },
+  {
+    inputs: [
+      {
+        internalType: "bytes16",
+        name: "marketId",
+        type: "bytes16"
+      }
+    ],
+    name: "settleMarket",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function"
+  }
+];
+
 const TOKEN = process.env.TELEGRAM_TOKEN || "YOUR_TELEGRAM_BOT_TOKEN";
 const url = "https://008a-203-12-0-167.ngrok-free.app";
 const port = process.env.PORT || 3002;
@@ -29,6 +370,7 @@ const express = require("express");
 // No need to pass any parameters as we will handle the updates with Express
 const bot = new TelegramBot(TOKEN);
 const { ethers } = require("ethers");
+// const { formatBytes16String } = require("horselink-sdk");
 const axios = require("axios");
 
 // This informs the Telegram servers of the new webhook.
@@ -40,7 +382,6 @@ const app = express();
 app.use(express.json());
 
 app.post("/test", (req, res) => {
-  // console.log(req.body);
   const { message } = req.body;
   const { text, from, params } = message;
   const args = params.split(" ");
@@ -51,7 +392,6 @@ app.post("/test", (req, res) => {
 });
 
 app.post("/test2", async (req, res) => {
-  // console.log(req.body);
   const { message } = req.body;
   const { text, from, params } = message;
   const args = params.split(" ");
@@ -62,7 +402,6 @@ app.post("/test2", async (req, res) => {
 
 // We are receiving updates at the route below!
 app.post(`/bot${TOKEN}`, (req, res) => {
-  console.log(req.body);
   bot.processUpdate(req.body);
   res.sendStatus(200);
 });
@@ -72,33 +411,43 @@ app.listen(port, () => {
   console.log(`Express server is listening on ${port}`);
 });
 
-// Just to ping!
 bot.on("message", msg => {
-  const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_URL);
-  const signer = ethers.Wallet.fromMnemonic(process.env.MNEMONIC);
+  console.log("Bot has this message: ", msg);
 
-  let response = "I am alive!";
+  let response_message = "Run it up!";
 
-  if (msg.message) {
-    if (msg.message?.text === "/balance") {
-      const token = "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9";
-      const erc20 = new ethers.Contract(token, abi, provider);
-      const account = "cullen.eth";
+  if (msg) {
+    let args = msg.text.split(" ");
+    const text = args[0];
+    const from = msg.from.id;
+    
+    args.shift();
 
-      let response = erc20.balanceOf(account).then(balance => {
-        return `Your balance is ${balance.toString()}`;
-      });
-    }
+    response_message = process_message(text, args, from).then(response => {
+      return response;
+    });
+
+    response_message.then(response => {
+      console.log(response);
+      bot.sendMessage(msg.chat.id, response);
+    });
   }
-
-  console.log(msg);
-  bot.sendMessage(response);
 });
 
 const process_message = async (command, params, from) => {
-  let response_message = "I am alive!";
+  console.log("Processing command: ", command);
+
+  let response_message = "Run it up!";
   const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_URL);
-  const signer = ethers.Wallet.fromMnemonic(process.env.MNEMONIC, `m/44'/60'/0'/0/${from}`);
+  // const signer = ethers.Wallet.fromMnemonic(
+  //   process.env.MNEMONIC,
+  //   `m/44'/60'/0'/0/${from}`
+  // );
+
+  const signer = ethers.Wallet.fromMnemonic(
+    process.env.MNEMONIC,
+    `m/44'/60'/0'/0/2`
+  );
 
   if (command === "/address" || command === "/account") {
     return signer.address;
@@ -107,10 +456,17 @@ const process_message = async (command, params, from) => {
   if (command === "/balance") {
     const token = "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9";
     const erc20 = new ethers.Contract(token, abi, provider);
-    const account = "0xb93F6D1ea9EB588B559155601Ef969d264277B43";
 
-    const balance = await erc20.balanceOf(account);
-    return `Your balance is ${balance.toString()}`;
+    const symbol = await erc20.symbol();
+
+    const balance = await erc20.balanceOf(signer.address);
+    const formatted_balance = ethers.utils.formatUnits(balance, 6);
+
+    return `Your balance is ${formatted_balance.toString()} ${symbol}`;
+  }
+
+  if (command === "/transfer") {
+    return "Coming soon!";
   }
 
   if (command === "/odds") {
@@ -123,40 +479,73 @@ const process_message = async (command, params, from) => {
     const result = await axios.get(
       `https://alpha.horse.link/api/runners/${venue}/${race}/win`
     );
-    //   // console.log(response.data.data.runners);
-    //   console.log(response.data.data.runners[horse - 1]);
-    //   return response.data.data.runners[horse - 1];
-    // });
 
-    return `The odds for ${result.data.data.runners[horse - 1].name} are ${
-      result.data.data.runners[horse - 1].odds
-    }`;
+    const runner = result.data.data.runners.filter(r => r.number === horse)[0];
 
-    // response_message = response_message.then(response => {
-    //   const odds = response.odds;
-    //   return `The odds for ${response.name} are ${odds}`;
-    // });
+    return `The odds for ${runner.name} are ${runner.odds}`;
   }
 
-  // if (command === "/back") {
-  //   // fetch odds from api with axios
+  if (command === "/history") {
+    const result = await axios.get(
+      "https://alpha.horse.link/api/bets/history?filter=ALL_BETS"
+    );
+  }
 
-  //   const venue = params[0];
-  //   const race = params[1].substring(1);
-  //   const horse = Number(params[2].substring(1));
+  if (command === "/back" || command === "/bet") {
+    const venue = params[0];
+    const race = params[1].substring(1);
+    const horse = Number(params[2].substring(1));
+    const wager = Number(params[3].substring(1));
+    const wager_bigint = ethers.utils.parseEther(wager.toString(), 6);
 
-  //   response_message = axios
-  //     .get(`https://alpha.horse.link/api/runners/${venue}/${race}/win`)
-  //     .then(response => {
-  //       // console.log(response.data.data.runners);
-  //       console.log(response.data.data.runners[horse - 1]);
-  //       return response.data.data.runners[horse - 1];
-  //     });
-  // }
+    const result = await axios.get(
+      `https://alpha.horse.link/api/runners/${venue}/${race}/win`
+    );
+
+    const runner = result.data.data.runners.filter(r => r.number === horse)[0];
+    console.log(runner);
+
+    const market = "0x47563a2fA82200c0f652fd4688c71f10a2c8DAF3";
+    signer.connect(provider);
+    const contract = new ethers.Contract(market, market_abi, signer);
+    
+    // const nonce_bytes = ethers.utils.hexlify(runner.nonce);
+    // const propositionId_bytes = ethers.utils.hexlify(runner.propositionId);
+    // const marketId_bytes = ethers.utils.hexlify(runner.marketId);
+
+    const tx = await contract.back({
+      nonce: formatBytes16String(runner.nonce),
+      propositionId: formatBytes16String(runner.propositionId),
+      marketId: formatBytes16String(runner.marketId),
+      wager: wager_bigint,
+      odds: runner.odds,
+      close: runner.close,
+      end: runner.end,
+      signature: {
+        v: 27,
+        r: runner.signature.r,
+        s: runner.signature.s
+      }
+    });
+
+    console.log(tx);
+    response_message = `You backed ${runner.name} with ${wager_bigint} ${tx}!`;
+  }
 
   console.log(response_message);
 
   return response_message;
+};
+
+const get_balance = () => {
+  const token = "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9";
+  const erc20 = new ethers.Contract(token, abi, provider);
+  const account = "0xb93F6D1ea9EB588B559155601Ef969d264277B43";
+
+  response_message = erc20.balanceOf(account).then(balance => {
+    console.log(balance);
+    return `Your balance is ${balance.toString()}`;
+  });
 };
 
 // const process_message = (command, params, from) => {
@@ -216,3 +605,49 @@ const process_message = async (command, params, from) => {
 
 //   return response_message;
 // };
+
+const formatBytes16String = (text) => {
+
+	const bytes = toUtf8Bytes(text);
+
+	// Check we have room for null-termination
+	if (bytes.length > 15) {
+		throw new Error("bytes16 string must be less than 16 bytes");
+	}
+
+	// Zero-pad (implicitly null-terminates)
+	return ethers.utils.hexlify(concat([bytes, ethers.constants.HashZero]).slice(0, 16));
+
+};
+
+const toUtf8Bytes = (str) => {
+
+  var utf8 = [];
+    for (var i=0; i < str.length; i++) {
+        var charcode = str.charCodeAt(i);
+        if (charcode < 0x80) utf8.push(charcode);
+        else if (charcode < 0x800) {
+            utf8.push(0xc0 | (charcode >> 6), 
+                      0x80 | (charcode & 0x3f));
+        }
+        else if (charcode < 0xd800 || charcode >= 0xe000) {
+            utf8.push(0xe0 | (charcode >> 12), 
+                      0x80 | ((charcode>>6) & 0x3f), 
+                      0x80 | (charcode & 0x3f));
+        }
+        // surrogate pair
+        else {
+            i++;
+            // UTF-16 encodes 0x10000-0x10FFFF by
+            // subtracting 0x10000 and splitting the
+            // 20 bits of 0x0-0xFFFFF into two halves
+            charcode = 0x10000 + (((charcode & 0x3ff)<<10)
+                      | (str.charCodeAt(i) & 0x3ff));
+            utf8.push(0xf0 | (charcode >>18), 
+                      0x80 | ((charcode>>12) & 0x3f), 
+                      0x80 | ((charcode>>6) & 0x3f), 
+                      0x80 | (charcode & 0x3f));
+        }
+    }
+    return utf8;
+};
