@@ -29,6 +29,7 @@ const express = require("express");
 // No need to pass any parameters as we will handle the updates with Express
 const bot = new TelegramBot(TOKEN);
 const { ethers } = require("ethers");
+const axios = require("axios");
 
 // This informs the Telegram servers of the new webhook.
 bot.setWebHook(`${url}/bot${TOKEN}`);
@@ -42,11 +43,11 @@ app.post("/test", (req, res) => {
 
   // console.log(req.body);
   const { message } = req.body;
-  const { text, from } = message;
+  const { text, from, params } = message;
+  const args = params.split(" ");
 
-  process_message(text, from).then(response => {
+  process_message(text, args, from).then(response => {
     res.send(response);
-    res.end();
   });
 });
 
@@ -86,23 +87,58 @@ bot.on("message", msg => {
   bot.sendMessage(response);
 });
 
-const process_message = (text, from) => {
+const process_message = (command, params, from) => {
 
-  let response = "I am alive!";
+  let response_message = "I am alive!";
   const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_URL);
   const signer = ethers.Wallet.fromMnemonic(process.env.MNEMONIC);
 
-  if (text === "/balance") {
+  if (command === "/balance") {
 
     const token = "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9";
     const erc20 = new ethers.Contract(token, abi, provider);
     const account = "0xb93F6D1ea9EB588B559155601Ef969d264277B43";
 
-    response = erc20.balanceOf(account).then(balance => {
+    response_message = erc20.balanceOf(account).then(balance => {
       console.log(balance);
       return `Your balance is ${balance.toString()}`;
     });
   }
 
-  return response;
+  if (command === "/odds") {
+    // fetch odds from api with axios
+
+    const venue = params[0];
+    const race = params[1].substring(1);
+    const horse = Number(params[2].substring(1));
+
+    response_message = axios.get(`https://alpha.horse.link/api/runners/${venue}/${race}/win`).then(response => {
+      // console.log(response.data.data.runners);
+      console.log(response.data.data.runners[horse - 1]);
+      return response.data.data.runners[horse - 1];
+    });
+
+    response_message = response_message.then(response => {
+      const odds = response.odds;
+      return `The odds for ${response.name} are ${odds}`;
+    });
+  };
+
+  if (command === "/back") {
+    // fetch odds from api with axios
+
+    const venue = params[0];
+    const race = params[1].substring(1);
+    const horse = Number(params[2].substring(1));
+
+    response_message = axios.get(`https://alpha.horse.link/api/runners/${venue}/${race}/win`).then(response => {
+      // console.log(response.data.data.runners);
+      console.log(response.data.data.runners[horse - 1]);
+      return response.data.data.runners[horse - 1];
+    });
+  };
+
+  console.log(response_message);
+
+  return response_message;
 };
