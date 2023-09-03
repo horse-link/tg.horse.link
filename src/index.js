@@ -476,8 +476,6 @@ const process_message = async (command, params, from) => {
     }
 
     if (command === "/odds") {
-      // fetch odds from api with axios
-
       const venue = params[0];
 
       // Get only number from params[1] using regex
@@ -493,6 +491,26 @@ const process_message = async (command, params, from) => {
       )[0];
 
       return `The odds for ${runner.name} are ${runner.odds}`;
+    }
+
+    if (command === "/runners") {
+      const venue = params[0];
+
+      // Get only number from params[1] using regex
+      const race = Number(params[1].match(r)[0]);
+
+      const result = await axios.get(
+        `https://alpha.horse.link/api/runners/${venue}/${race}/win`
+      );
+
+      let response = "";
+      const runners = result.data.data.runners;
+
+      for (let i = 0; i < runners.length; i++) {
+        response += `${runners[i].number} ${runners[i].name} ${runners[i].odds} \n`;
+      };
+
+      return response;
     }
 
     if (command === "/history") {
