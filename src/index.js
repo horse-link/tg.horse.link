@@ -455,6 +455,19 @@ const process_message = async (command, params, from) => {
       `m/44'/60'/0'/0/${from}`
     );
 
+    if (command === "/help") {
+      let response = "Commands: \n";
+      response += "/address - Get your address \n";
+      response += "/back - Back ahorse \n";
+      response += "/balance - Get your balance \n";
+      response += "/history - Get your betting history \n";
+      response += "/odds - Get odds for a horse \n";
+      response += "/runners - Get the runners for a race \n";
+      response += "/transfer - Transfer tokens \n";
+
+      return response;
+    }
+
     if (command === "/address" || command === "/account") {
       return signer.address;
     }
@@ -576,14 +589,23 @@ const process_message = async (command, params, from) => {
     }
 
     if (command === "/transfer" || command === "/send" || command === "/withdraw") {
+      if (params.length < 2) {
+        return "Please provide all parameters Amount Recipient";
+      }
+
       const token = "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9";
       
       const _signer = new ethers.Wallet(signer.privateKey, provider);
       const erc20 = new ethers.Contract(token, abi, _signer);
 
       const amount = ethers.utils.parseUnits(params[0], 6);
-      const to = params[1];
 
+      const balance = await erc20.balanceOf(signer.address);
+      if (balance.lt(amount)) {
+        return "You don't have enough tokens to send that amount.";
+      };
+
+      const to = params[1];
       const tx = await erc20.transfer(to, amount);
       return "Done! The transaction hash is " + tx.hash;
     };
