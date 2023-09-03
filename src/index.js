@@ -436,128 +436,139 @@ bot.on("message", msg => {
 });
 
 const process_message = async (command, params, from) => {
-  console.log("Processing command: ", command);
+  try {
+    console.log("Processing command: ", command);
+    const r = /\d+/;
 
-  let response_message = "Run it up!";
-  const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_URL);
-  // const signer = ethers.Wallet.fromMnemonic(
-  //   process.env.MNEMONIC,
-  //   `m/44'/60'/0'/0/${from}`
-  // );
+    let response_message = "Run it up!";
+    const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_URL);
+    // const signer = ethers.Wallet.fromMnemonic(
+    //   process.env.MNEMONIC,
+    //   `m/44'/60'/0'/0/${from}`
+    // );
 
-  const signer = ethers.Wallet.fromMnemonic(
-    process.env.MNEMONIC,
-    `m/44'/60'/0'/0/${from}`
-  );
-
-  if (command === "/address" || command === "/account") {
-    return signer.address;
-  }
-
-  if (command === "/balance") {
-    const token = "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9";
-    const erc20 = new ethers.Contract(token, abi, provider);
-
-    const symbol = await erc20.symbol();
-
-    const balance = await erc20.balanceOf(signer.address);
-    const formatted_balance = ethers.utils.formatUnits(balance, 6);
-
-    return `Your balance is ${formatted_balance.toString()} ${symbol}`;
-  }
-
-  if (command === "/transfer") {
-    return "Coming soon!";
-  }
-
-  if (command === "/odds") {
-    // fetch odds from api with axios
-
-    const venue = params[0];
-
-    // Get only number from params[1] using regex
-    const race = params[1].substring(1);
-    const horse = Number(params[2].substring(1));
-
-    const result = await axios.get(
-      `https://alpha.horse.link/api/runners/${venue}/${race}/win`
+    const signer = ethers.Wallet.fromMnemonic(
+      process.env.MNEMONIC,
+      `m/44'/60'/0'/0/${from}`
     );
 
-    const runner = result.data.data.runners.filter(r => r.number === horse)[0];
-
-    return `The odds for ${runner.name} are ${runner.odds}`;
-  }
-
-  if (command === "/history") {
-    const result = await axios.get(
-      "https://alpha.horse.link/api/bets/history?filter=ALL_BETS"
-    );
-  }
-
-  if (command === "/back" || command === "/bet") {
-
-    if (params.length < 4) {
-      return "Please provide all parameters Race Horse Wager";
+    if (command === "/address" || command === "/account") {
+      return signer.address;
     }
 
-    const venue = params[0];
+    if (command === "/balance") {
+      const token = "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9";
+      const erc20 = new ethers.Contract(token, abi, provider);
 
-    const r = /\d+/;
-    // const s = "you can enter maximum 500 choices";
-    // alert (s.match(r));
-    const race = Number(params[1].match(r)[0]);
-    const horse = Number(params[2].match(r)[0]);
-    const wager = Number(params[3].match(r)[0]);
-    const wager_bigint = ethers.utils.parseUnits(wager.toString(), 6);
+      const symbol = await erc20.symbol();
 
-    const result = await axios.get(
-      `https://alpha.horse.link/api/runners/${venue}/${race}/win`
-    );
+      const balance = await erc20.balanceOf(signer.address);
+      const formatted_balance = ethers.utils.formatUnits(balance, 6);
 
-    const runner = result.data.data.runners.filter(r => r.number === horse)[0];
-    console.log(runner);
+      return `Your balance is ${formatted_balance.toString()} ${symbol}`;
+    }
 
-    const market = "0x47563a2fA82200c0f652fd4688c71f10a2c8DAF3";
-    signer.connect(provider);
-    const contract = new ethers.Contract(market, market_abi, signer);
+    if (command === "/transfer") {
+      return "Coming soon!";
+    }
 
-    // const propositionId_bytes = ethers.utils.hexlify(runner.propositionId);
-    // const marketId_bytes = ethers.utils.hexlify(runner.marketId);
+    if (command === "/odds") {
+      // fetch odds from api with axios
 
-    const tx = await contract.back({
-      nonce: runner.nonce,
-      propositionId: formatBytes16String(runner.proposition_id),
-      marketId: formatBytes16String(runner.market_id),
-      wager: wager_bigint,
-      odds: ethers.utils.parseUnits(runner.odds.toString(), 6),
-      close: runner.close,
-      end: runner.end,
-      signature: {
-        v: 27,
-        r: runner.signature.r,
-        s: runner.signature.s
+      const venue = params[0];
+
+      // Get only number from params[1] using regex
+      const race = Number(params[1].match(r)[0]);
+      const horse = Number(params[2].match(r)[0]);
+
+      const result = await axios.get(
+        `https://alpha.horse.link/api/runners/${venue}/${race}/win`
+      );
+
+      const runner = result.data.data.runners.filter(r => r.number === horse)[0];
+
+      return `The odds for ${runner.name} are ${runner.odds}`;
+    }
+
+    if (command === "/history") {
+      const result = await axios.get(
+        "https://alpha.horse.link/api/bets/history?filter=ALL_BETS"
+      );
+
+      const bets = result.data.data.bets.filter(b => b.account === signer.address);
+      if (bets.length > 0) {
+        const last_bet = bets[bets.length - 1];
+        return "Your last bet was";
+      };
+
+      return "Np previous bets found.";
+    }
+
+    if (command === "/back" || command === "/bet") {
+
+      if (params.length < 4) {
+        return "Please provide all parameters Race Horse Wager";
       }
-    });
 
-    console.log(tx);
-    response_message = `You backed ${runner.name} with ${wager_bigint} ${tx}!`;
+      const venue = params[0];
+
+      const race = Number(params[1].match(r)[0]);
+      const horse = Number(params[2].match(r)[0]);
+      const wager = Number(params[3].match(r)[0]);
+      const wager_bigint = ethers.utils.parseUnits(wager.toString(), 6);
+
+      const result = await axios.get(
+        `https://alpha.horse.link/api/runners/${venue}/${race}/win`
+      );
+
+      const runner = result.data.data.runners.filter(r => r.number === horse)[0];
+      console.log(runner);
+
+      const market = "0x47563a2fA82200c0f652fd4688c71f10a2c8DAF3";
+      signer.connect(provider);
+      const contract = new ethers.Contract(market, market_abi, signer);
+
+      // const propositionId_bytes = ethers.utils.hexlify(runner.propositionId);
+      // const marketId_bytes = ethers.utils.hexlify(runner.marketId);
+
+      const tx = await contract.back({
+        nonce: runner.nonce,
+        propositionId: formatBytes16String(runner.proposition_id),
+        marketId: formatBytes16String(runner.market_id),
+        wager: wager_bigint,
+        odds: ethers.utils.parseUnits(runner.odds.toString(), 6),
+        close: runner.close,
+        end: runner.end,
+        signature: {
+          v: 27,
+          r: runner.signature.r,
+          s: runner.signature.s
+        }
+      });
+
+      console.log(tx);
+      response_message = `You backed ${runner.name} with ${wager_bigint} ${tx}!`;
+    }
+
+    console.log(response_message);
+    return response_message;
   }
-
-  console.log(response_message);
-
-  return response_message;
+  catch (err) {
+    console.log(err);
+    return err;
+  }
 };
 
-const get_balance = () => {
-  const token = "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9";
-  const erc20 = new ethers.Contract(token, abi, provider);
-  const account = "0xb93F6D1ea9EB588B559155601Ef969d264277B43";
+// const get_balance = () => {
+//   const token = "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9";
+//   const erc20 = new ethers.Contract(token, abi, provider);
+//   const account = "0xb93F6D1ea9EB588B559155601Ef969d264277B43";
 
-  response_message = erc20.balanceOf(account).then(balance => {
-    console.log(balance);
-    return `Your balance is ${balance.toString()}`;
-  });
-};
+//   response_message = erc20.balanceOf(account).then(balance => {
+//     console.log(balance);
+//     return `Your balance is ${balance.toString()}`;
+//   });
+// };
 
 // const process_message = (command, params, from) => {
 
