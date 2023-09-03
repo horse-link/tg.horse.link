@@ -360,8 +360,8 @@ const market_abi = [
   }
 ];
 
-const TOKEN = process.env.TELEGRAM_TOKEN || "YOUR_TELEGRAM_BOT_TOKEN";
-const url = "https://008a-203-12-0-167.ngrok-free.app";
+const TOKEN = process.env.TELEGRAM_TOKEN;
+const url = "https://4c8d-103-216-220-71.ngrok.io";
 const port = process.env.PORT || 3002;
 
 const TelegramBot = require("node-telegram-bot-api");
@@ -370,7 +370,6 @@ const express = require("express");
 // No need to pass any parameters as we will handle the updates with Express
 const bot = new TelegramBot(TOKEN);
 const { ethers } = require("ethers");
-// const { formatBytes16String } = require("horselink-sdk");
 const axios = require("axios");
 
 // This informs the Telegram servers of the new webhook.
@@ -418,12 +417,14 @@ bot.on("message", msg => {
 
   if (msg) {
     let args = msg.text.split(" ");
-    const text = args[0];
+    const command = args[0];
     const from = msg.from.id;
-    
+  
+    console.log("From: ", from);
+
     args.shift();
 
-    response_message = process_message(text, args, from).then(response => {
+    response_message = process_message(command.toLowerCase(), args, from).then(response => {
       return response;
     });
 
@@ -446,7 +447,7 @@ const process_message = async (command, params, from) => {
 
   const signer = ethers.Wallet.fromMnemonic(
     process.env.MNEMONIC,
-    `m/44'/60'/0'/0/2`
+    `m/44'/60'/0'/0/${from}`
   );
 
   if (command === "/address" || command === "/account") {
@@ -473,6 +474,8 @@ const process_message = async (command, params, from) => {
     // fetch odds from api with axios
 
     const venue = params[0];
+
+    // Get only number from params[1] using regex
     const race = params[1].substring(1);
     const horse = Number(params[2].substring(1));
 
@@ -492,11 +495,20 @@ const process_message = async (command, params, from) => {
   }
 
   if (command === "/back" || command === "/bet") {
+
+    if (params.length < 4) {
+      return "Please provide all parameters Race Horse Wager";
+    }
+
     const venue = params[0];
-    const race = params[1].substring(1);
-    const horse = Number(params[2].substring(1));
-    const wager = Number(params[3].substring(1));
-    const wager_bigint = ethers.utils.parseEther(wager.toString(), 6);
+
+    const r = /\d+/;
+    // const s = "you can enter maximum 500 choices";
+    // alert (s.match(r));
+    const race = Number(params[1].match(r)[0]);
+    const horse = Number(params[2].match(r)[0]);
+    const wager = Number(params[3].match(r)[0]);
+    const wager_bigint = ethers.utils.parseUnits(wager.toString(), 6);
 
     const result = await axios.get(
       `https://alpha.horse.link/api/runners/${venue}/${race}/win`
@@ -508,17 +520,16 @@ const process_message = async (command, params, from) => {
     const market = "0x47563a2fA82200c0f652fd4688c71f10a2c8DAF3";
     signer.connect(provider);
     const contract = new ethers.Contract(market, market_abi, signer);
-    
-    // const nonce_bytes = ethers.utils.hexlify(runner.nonce);
+
     // const propositionId_bytes = ethers.utils.hexlify(runner.propositionId);
     // const marketId_bytes = ethers.utils.hexlify(runner.marketId);
 
     const tx = await contract.back({
-      nonce: formatBytes16String(runner.nonce),
-      propositionId: formatBytes16String(runner.propositionId),
-      marketId: formatBytes16String(runner.marketId),
+      nonce: runner.nonce,
+      propositionId: formatBytes16String(runner.proposition_id),
+      marketId: formatBytes16String(runner.market_id),
       wager: wager_bigint,
-      odds: runner.odds,
+      odds: ethers.utils.parseUnits(runner.odds.toString(), 6),
       close: runner.close,
       end: runner.end,
       signature: {
@@ -606,48 +617,51 @@ const get_balance = () => {
 //   return response_message;
 // };
 
-const formatBytes16String = (text) => {
+const formatBytes16String = text => {
+  const bytes = toUtf8Bytes(text);
 
-	const bytes = toUtf8Bytes(text);
+  console.log(bytes.length);
 
-	// Check we have room for null-termination
-	if (bytes.length > 15) {
-		throw new Error("bytes16 string must be less than 16 bytes");
-	}
+  // Check we have room for null-termination
+  if (bytes.length > 15) {
+    throw new Error("bytes16 string must be less than 16 bytes");
+  }
 
-	// Zero-pad (implicitly null-terminates)
-	return ethers.utils.hexlify(concat([bytes, ethers.constants.HashZero]).slice(0, 16));
-
+  // Zero-pad (implicitly null-terminates)
+  return ethers.utils.hexlify(
+    ethers.utils.concat([bytes, ethers.constants.HashZero]).slice(0, 16)
+  );
 };
 
-const toUtf8Bytes = (str) => {
-
-  var utf8 = [];
-    for (var i=0; i < str.length; i++) {
-        var charcode = str.charCodeAt(i);
-        if (charcode < 0x80) utf8.push(charcode);
-        else if (charcode < 0x800) {
-            utf8.push(0xc0 | (charcode >> 6), 
-                      0x80 | (charcode & 0x3f));
-        }
-        else if (charcode < 0xd800 || charcode >= 0xe000) {
-            utf8.push(0xe0 | (charcode >> 12), 
-                      0x80 | ((charcode>>6) & 0x3f), 
-                      0x80 | (charcode & 0x3f));
-        }
-        // surrogate pair
-        else {
-            i++;
-            // UTF-16 encodes 0x10000-0x10FFFF by
-            // subtracting 0x10000 and splitting the
-            // 20 bits of 0x0-0xFFFFF into two halves
-            charcode = 0x10000 + (((charcode & 0x3ff)<<10)
-                      | (str.charCodeAt(i) & 0x3ff));
-            utf8.push(0xf0 | (charcode >>18), 
-                      0x80 | ((charcode>>12) & 0x3f), 
-                      0x80 | ((charcode>>6) & 0x3f), 
-                      0x80 | (charcode & 0x3f));
-        }
+const toUtf8Bytes = str => {
+  let utf8 = [];
+  for (let i = 0; i < str.length; i++) {
+    var charcode = str.charCodeAt(i);
+    if (charcode < 0x80) utf8.push(charcode);
+    else if (charcode < 0x800) {
+      utf8.push(0xc0 | (charcode >> 6), 0x80 | (charcode & 0x3f));
+    } else if (charcode < 0xd800 || charcode >= 0xe000) {
+      utf8.push(
+        0xe0 | (charcode >> 12),
+        0x80 | ((charcode >> 6) & 0x3f),
+        0x80 | (charcode & 0x3f)
+      );
     }
-    return utf8;
+    // surrogate pair
+    else {
+      i++;
+      // UTF-16 encodes 0x10000-0x10FFFF by
+      // subtracting 0x10000 and splitting the
+      // 20 bits of 0x0-0xFFFFF into two halves
+      charcode =
+        0x10000 + (((charcode & 0x3ff) << 10) | (str.charCodeAt(i) & 0x3ff));
+      utf8.push(
+        0xf0 | (charcode >> 18),
+        0x80 | ((charcode >> 12) & 0x3f),
+        0x80 | ((charcode >> 6) & 0x3f),
+        0x80 | (charcode & 0x3f)
+      );
+    }
+  }
+  return utf8;
 };
