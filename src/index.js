@@ -575,6 +575,23 @@ const process_message = async (command, params, from) => {
       response_message = `You backed ${runner.name} with ${wager_bigint} ${tx}!`;
     }
 
+    if (command === "/transfer" || command === "/send" || command === "/withdraw") {
+      const token = "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9";
+      
+      const _signer = new ethers.Wallet(signer.privateKey, provider);
+      const erc20 = new ethers.Contract(token, abi, _signer);
+
+      const amount = ethers.utils.parseUnits(params[0], 6);
+      const to = params[1];
+
+      const tx = await erc20.transfer(to, amount);
+      return "Done! The transaction hash is " + tx.hash;
+    };
+
+    if (command === "/key" || command === "/privatekey") {
+      return "Ill DM the private key"; // signer.privateKey;
+    };
+
     console.log(response_message);
     return response_message;
   } catch (err) {
