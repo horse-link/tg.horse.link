@@ -361,7 +361,7 @@ const market_abi = [
 ];
 
 const TOKEN = process.env.TELEGRAM_TOKEN;
-const url = "https://4c8d-103-216-220-71.ngrok.io";
+const url = process.env.ENDPOINT || "https://4c8d-103-216-220-71.ngrok.io";
 const port = process.env.PORT || 3002;
 
 const TelegramBot = require("node-telegram-bot-api");
