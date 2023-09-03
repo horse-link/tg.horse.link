@@ -423,14 +423,16 @@ bot.on("message", msg => {
     let args = msg.text.split(" ");
     const command = args[0];
     const from = msg.from.id;
-  
+
     console.log("From: ", from);
 
     args.shift();
 
-    response_message = process_message(command.toLowerCase(), args, from).then(response => {
-      return response;
-    });
+    response_message = process_message(command.toLowerCase(), args, from).then(
+      response => {
+        return response;
+      }
+    );
 
     response_message.then(response => {
       console.log(response);
@@ -445,12 +447,9 @@ const process_message = async (command, params, from) => {
     const r = /\d+/;
 
     let response_message = "Run it up!";
-    const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_URL);
-    // const signer = ethers.Wallet.fromMnemonic(
-    //   process.env.MNEMONIC,
-    //   `m/44'/60'/0'/0/${from}`
-    // );
 
+    console.log("Provider: ", process.env.RPC_URL);
+    const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_URL);
     const signer = ethers.Wallet.fromMnemonic(
       process.env.MNEMONIC,
       `m/44'/60'/0'/0/${from}`
@@ -489,7 +488,9 @@ const process_message = async (command, params, from) => {
         `https://alpha.horse.link/api/runners/${venue}/${race}/win`
       );
 
-      const runner = result.data.data.runners.filter(r => r.number === horse)[0];
+      const runner = result.data.data.runners.filter(
+        r => r.number === horse
+      )[0];
 
       return `The odds for ${runner.name} are ${runner.odds}`;
     }
@@ -499,17 +500,19 @@ const process_message = async (command, params, from) => {
         "https://alpha.horse.link/api/bets/history?filter=ALL_BETS"
       );
 
-      const bets = result.data.data.bets.filter(b => b.account === signer.address);
-      if (bets.length > 0) {
+      const bets = result.data?.data?.bets.filter(
+        b => b.account === signer.address
+      );
+
+      if (bets?.length > 0) {
         const last_bet = bets[bets.length - 1];
         return "Your last bet was";
-      };
+      }
 
-      return "Np previous bets found.";
+      return "No previous bets found.";
     }
 
     if (command === "/back" || command === "/bet") {
-
       if (params.length < 4) {
         return "Please provide all parameters Race Horse Wager";
       }
@@ -525,15 +528,15 @@ const process_message = async (command, params, from) => {
         `https://alpha.horse.link/api/runners/${venue}/${race}/win`
       );
 
-      const runner = result.data.data.runners.filter(r => r.number === horse)[0];
+      const runner = result.data.data.runners.filter(
+        r => r.number === horse
+      )[0];
       console.log(runner);
 
       const market = "0x47563a2fA82200c0f652fd4688c71f10a2c8DAF3";
-      signer.connect(provider);
-      const contract = new ethers.Contract(market, market_abi, signer);
 
-      // const propositionId_bytes = ethers.utils.hexlify(runner.propositionId);
-      // const marketId_bytes = ethers.utils.hexlify(runner.marketId);
+      const _signer = new ethers.Wallet(signer.privateKey, provider);
+      const contract = new ethers.Contract(market, market_abi, _signer);
 
       const tx = await contract.back({
         nonce: runner.nonce,
@@ -556,8 +559,7 @@ const process_message = async (command, params, from) => {
 
     console.log(response_message);
     return response_message;
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err);
     return err;
   }
