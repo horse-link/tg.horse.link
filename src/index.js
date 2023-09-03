@@ -380,6 +380,10 @@ const app = express();
 // parse the updates to JSON
 app.use(express.json());
 
+app.get("/", (req, res) => {
+  res.send("Checkout alpha.horse.link for web3 wagering!");
+});
+
 app.post("/test", (req, res) => {
   const { message } = req.body;
   const { text, from, params } = message;
