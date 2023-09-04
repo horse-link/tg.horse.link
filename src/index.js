@@ -455,12 +455,14 @@ const process_message = async (command, params, from) => {
 
     if (command === "/help") {
       let response = "Commands: \n";
+      response += "/allow - Set your allowance for the market \n";
       response += "/allowance - Get your allowance for the market \n";
       response += "/address - Get your address \n";
       response += "/back - Back a horse \n";
       response += "/balance - Get your balance \n";
       response += "/history - Get your betting history \n";
       response += "/odds - Get odds for a horse \n";
+      response += "/races - Get todays races \n";
       response += "/runners - Get the runners for a race \n";
       response += "/transfer - Transfer tokens \n";
 
