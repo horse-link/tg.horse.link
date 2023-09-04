@@ -424,8 +424,6 @@ bot.on("message", msg => {
     const command = args[0];
     const from = msg.from.id;
 
-    console.log("From: ", from);
-
     args.shift();
 
     response_message = process_message(command.toLowerCase(), args, from).then(
@@ -457,8 +455,9 @@ const process_message = async (command, params, from) => {
 
     if (command === "/help") {
       let response = "Commands: \n";
+      response += "/allowance - Get your allowance for the market \n";
       response += "/address - Get your address \n";
-      response += "/back - Back ahorse \n";
+      response += "/back - Back a horse \n";
       response += "/balance - Get your balance \n";
       response += "/history - Get your betting history \n";
       response += "/odds - Get odds for a horse \n";
@@ -472,8 +471,36 @@ const process_message = async (command, params, from) => {
       return signer.address;
     }
 
+    if (command === "/allow") {
+      // TODO: Call market and get the underlying token
+      const market = "0x47563a2fA82200c0f652fd4688c71f10a2c8DAF3";
+      const token = process.env.TOKEN || "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9";
+
+      const _signer = new ethers.Wallet(signer.privateKey, provider);
+      const erc20 = new ethers.Contract(token, abi, _signer);
+      const amount = ethers.utils.parseUnits(params[0], 6);
+
+      const tx = await erc20.allow(market, amount);
+
+      return `Done! The transaction hash is ${tx.hash}`;
+    }
+
+    if (command === "/allowance") {
+      // TODO: Call market and get the underlying token
+      const market = "0x47563a2fA82200c0f652fd4688c71f10a2c8DAF3";
+      const token = process.env.TOKEN || "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9";
+      const erc20 = new ethers.Contract(token, abi, provider);
+
+      const symbol = await erc20.symbol();
+
+      const allowance = await erc20.allowance(signer.address, market);
+      const formatted_allowance = ethers.utils.formatUnits(allowance, 6);
+
+      return `Your allowance is ${formatted_allowance.toString()} ${symbol}`;
+    }
+
     if (command === "/balance") {
-      const token = "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9";
+      const token = process.env.TOKEN || "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9";
       const erc20 = new ethers.Contract(token, abi, provider);
 
       const symbol = await erc20.symbol();
@@ -484,8 +511,19 @@ const process_message = async (command, params, from) => {
       return `Your balance is ${formatted_balance.toString()} ${symbol}`;
     }
 
-    if (command === "/transfer") {
-      return "Coming soon!";
+    if (command === "/meets" || command === "/races") {
+      const result = await axios.get(
+        `https://alpha.horse.link/api/runners/meetings`
+      );
+
+      let response = "";
+      const meetings = result.data.data.meetings;
+
+      for (let i = 0; i < meetings.length; i++) {
+        response += `${meetings[i].location} ${runners[i].name} \n`;
+      };
+
+      return response;
     }
 
     if (command === "/odds") {
@@ -593,11 +631,10 @@ const process_message = async (command, params, from) => {
         return "Please provide all parameters Amount Recipient";
       }
 
-      const token = "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9";
+      const token = process.env.TOKEN || "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9";
       
       const _signer = new ethers.Wallet(signer.privateKey, provider);
       const erc20 = new ethers.Contract(token, abi, _signer);
-
       const amount = ethers.utils.parseUnits(params[0], 6);
 
       const balance = await erc20.balanceOf(signer.address);
@@ -607,7 +644,7 @@ const process_message = async (command, params, from) => {
 
       const to = params[1];
       const tx = await erc20.transfer(to, amount);
-      return "Done! The transaction hash is " + tx.hash;
+      return `Done! The transaction hash is ${tx.hash}`;
     };
 
     if (command === "/key" || command === "/privatekey") {
