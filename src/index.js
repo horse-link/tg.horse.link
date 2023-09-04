@@ -528,7 +528,7 @@ const process_message = async (command, params, from) => {
       const meetings = result.data.data.meetings;
 
       for (let i = 0; i < meetings.length; i++) {
-        response += `${meetings[i].id} ${runners[i].name} \n`;
+        response += `${meetings[i].id} ${meetings[i].name} \n`;
       }
 
       return response;
