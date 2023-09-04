@@ -476,7 +476,8 @@ const process_message = async (command, params, from) => {
     if (command === "/allow") {
       // TODO: Call market and get the underlying token
       const market = "0x47563a2fA82200c0f652fd4688c71f10a2c8DAF3";
-      const token = process.env.TOKEN || "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9";
+      const token =
+        process.env.TOKEN || "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9";
 
       const _signer = new ethers.Wallet(signer.privateKey, provider);
       const erc20 = new ethers.Contract(token, abi, _signer);
@@ -490,7 +491,8 @@ const process_message = async (command, params, from) => {
     if (command === "/allowance") {
       // TODO: Call market and get the underlying token
       const market = "0x47563a2fA82200c0f652fd4688c71f10a2c8DAF3";
-      const token = process.env.TOKEN || "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9";
+      const token =
+        process.env.TOKEN || "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9";
       const erc20 = new ethers.Contract(token, abi, provider);
 
       const symbol = await erc20.symbol();
@@ -502,7 +504,8 @@ const process_message = async (command, params, from) => {
     }
 
     if (command === "/balance") {
-      const token = process.env.TOKEN || "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9";
+      const token =
+        process.env.TOKEN || "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9";
       const erc20 = new ethers.Contract(token, abi, provider);
 
       const symbol = await erc20.symbol();
@@ -514,7 +517,10 @@ const process_message = async (command, params, from) => {
     }
 
     if (command === "/meets" || command === "/races") {
-      const result = await axios.get(
+      // add header to axiso request
+      const instance = axios.create({ headers: { chainid: "42161" } });
+
+      const result = await instance.get(
         `https://alpha.horse.link/api/runners/meetings`
       );
 
@@ -523,7 +529,7 @@ const process_message = async (command, params, from) => {
 
       for (let i = 0; i < meetings.length; i++) {
         response += `${meetings[i].location} ${runners[i].name} \n`;
-      };
+      }
 
       return response;
     }
@@ -561,7 +567,7 @@ const process_message = async (command, params, from) => {
 
       for (let i = 0; i < runners.length; i++) {
         response += `${runners[i].number} ${runners[i].name} ${runners[i].odds} \n`;
-      };
+      }
 
       return response;
     }
@@ -628,13 +634,18 @@ const process_message = async (command, params, from) => {
       response_message = `You backed ${runner.name} with ${wager_bigint} ${tx}!`;
     }
 
-    if (command === "/transfer" || command === "/send" || command === "/withdraw") {
+    if (
+      command === "/transfer" ||
+      command === "/send" ||
+      command === "/withdraw"
+    ) {
       if (params.length < 2) {
         return "Please provide all parameters Amount Recipient";
       }
 
-      const token = process.env.TOKEN || "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9";
-      
+      const token =
+        process.env.TOKEN || "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9";
+
       const _signer = new ethers.Wallet(signer.privateKey, provider);
       const erc20 = new ethers.Contract(token, abi, _signer);
       const amount = ethers.utils.parseUnits(params[0], 6);
@@ -642,16 +653,16 @@ const process_message = async (command, params, from) => {
       const balance = await erc20.balanceOf(signer.address);
       if (balance.lt(amount)) {
         return "You don't have enough tokens to send that amount.";
-      };
+      }
 
       const to = params[1];
       const tx = await erc20.transfer(to, amount);
       return `Done! The transaction hash is ${tx.hash}`;
-    };
+    }
 
     if (command === "/key" || command === "/privatekey") {
       return "Ill DM the private key"; // signer.privateKey;
-    };
+    }
 
     console.log(response_message);
     return response_message;
