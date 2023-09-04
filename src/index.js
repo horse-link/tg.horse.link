@@ -361,7 +361,7 @@ const market_abi = [
 ];
 
 const TOKEN = process.env.TELEGRAM_TOKEN;
-const url = process.env.ENDPOINT || "https://4c8d-103-216-220-71.ngrok.io";
+const url = process.env.ENDPOINT || "https://tg.horse.link";
 const port = process.env.PORT || 3002;
 
 const TelegramBot = require("node-telegram-bot-api");
@@ -419,7 +419,7 @@ bot.on("message", msg => {
 
   let response_message = "Run it up!";
 
-  if (msg) {
+  if (msg && msg.text?.startsWith("/")) {
     let args = msg.text.split(" ");
     const command = args[0];
     const from = msg.from.id;
