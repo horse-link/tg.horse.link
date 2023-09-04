@@ -518,17 +518,17 @@ const process_message = async (command, params, from) => {
 
     if (command === "/meets" || command === "/races") {
       // add header to axiso request
-      const instance = axios.create({ headers: { chainid: "42161" } });
+      // const instance = axios.create({ headers: { chainid: "42161" } });
 
-      const result = await instance.get(
-        `https://alpha.horse.link/api/runners/meetings`
+      const result = await axios.get(
+        `https://alpha.horse.link/api/meetings`
       );
 
       let response = "";
       const meetings = result.data.data.meetings;
 
       for (let i = 0; i < meetings.length; i++) {
-        response += `${meetings[i].location} ${runners[i].name} \n`;
+        response += `${meetings[i].id} ${runners[i].name} \n`;
       }
 
       return response;
