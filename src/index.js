@@ -490,6 +490,14 @@ const process_message = async (command, params, from) => {
     }
 
     if (command === "/allow" || command === "/approve") {
+
+      const gasPrice = await provider.getGasPrice();
+      
+      const options = {
+        gasPrice: gasPrice,
+        gasLimit: 1000000
+      };
+
       // TODO: Call market and get the underlying token
       const market = "0x47563a2fA82200c0f652fd4688c71f10a2c8DAF3";
       const token =
@@ -499,7 +507,7 @@ const process_message = async (command, params, from) => {
       const erc20 = new ethers.Contract(token, abi, _signer);
       const amount = ethers.utils.parseUnits(params[0], 6);
 
-      const tx = await erc20.approve(market, amount);
+      const tx = await erc20.approve(market, amount, options);
 
       return `Done! The transaction hash is ${tx.hash}`;
     }
@@ -625,11 +633,10 @@ const process_message = async (command, params, from) => {
       console.log(runner);
 
       const market = "0x47563a2fA82200c0f652fd4688c71f10a2c8DAF3";
-
-      const gasPrice = await provider.getGasPrice();
-
       const _signer = new ethers.Wallet(signer.privateKey, provider);
       const contract = new ethers.Contract(market, market_abi, _signer);
+
+      const gasPrice = await provider.getGasPrice();
 
       const options = {
         gasPrice: gasPrice,
