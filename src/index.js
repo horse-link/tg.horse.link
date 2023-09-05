@@ -14,6 +14,9 @@ const abi = [
 
   // Authenticated Functions
   "function transfer(address to, uint amount) returns (bool)",
+  "function transferFrom(address from, address to, uint amount) returns (bool)",
+  "function approve(address spender, uint amount) returns (bool)",
+  "function allowance(address owner, address spender) view returns (uint256)",
 
   // Events
   "event Transfer(address indexed from, address indexed to, uint amount)"
