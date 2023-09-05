@@ -476,7 +476,7 @@ const process_message = async (command, params, from) => {
       return signer.address;
     }
 
-    if (command === "/allow") {
+    if (command === "/allow" || command === "/approve") {
       // TODO: Call market and get the underlying token
       const market = "0x47563a2fA82200c0f652fd4688c71f10a2c8DAF3";
       const token =
@@ -486,7 +486,7 @@ const process_message = async (command, params, from) => {
       const erc20 = new ethers.Contract(token, abi, _signer);
       const amount = ethers.utils.parseUnits(params[0], 6);
 
-      const tx = await erc20.allow(market, amount);
+      const tx = await erc20.approve(market, amount);
 
       return `Done! The transaction hash is ${tx.hash}`;
     }
