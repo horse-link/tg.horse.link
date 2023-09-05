@@ -649,8 +649,8 @@ const process_message = async (command, params, from) => {
           nonce: runner.nonce,
           propositionId: formatBytes16String(runner.proposition_id),
           marketId: formatBytes16String(runner.market_id),
-          wager: wager_bigint,
-          odds,
+          wager: "1000000",
+          odds: odds,
           close: runner.close,
           end: runner.end,
           signature: {
