@@ -387,14 +387,27 @@ app.get("/", (req, res) => {
   res.send("Checkout alpha.horse.link for web3 wagering!");
 });
 
-app.post("/test", (req, res) => {
-  const { message } = req.body;
-  const { text, from, params } = message;
-  const args = params.split(" ");
+app.post("/process", async (req, res) => {
+  const { msg } = req.body;
+  console.log("Processing message: ", msg);
 
-  process_message(text, args, from).then(response => {
-    res.send(response);
-  });
+  let response_message = "Giddy up!";
+  
+  if (msg && msg.text?.startsWith("/")) {
+    let args = msg.text.split(" ");
+    const command = args[0];
+    const from = msg.from.id;
+
+    args.shift();
+
+    response_message = await process_message(command.toLowerCase(), args, from);
+
+    res.send(response_message);
+    res.end();
+  }
+
+  res.status(500);
+  res.end();
 });
 
 app.post("/test2", async (req, res) => {
@@ -420,7 +433,7 @@ app.listen(port, () => {
 bot.on("message", msg => {
   console.log("Bot has this message: ", msg);
 
-  let response_message = "Run it up!";
+  let response_message = "Giddy up!";
 
   if (msg && msg.text?.startsWith("/")) {
     let args = msg.text.split(" ");
@@ -447,7 +460,7 @@ const process_message = async (command, params, from) => {
     console.log("Processing command: ", command);
     const r = /\d+/;
 
-    let response_message = "Run it up!";
+    let response_message = "Giddy up!";
 
     console.log("Provider: ", process.env.RPC_URL);
     const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_URL);
@@ -523,9 +536,7 @@ const process_message = async (command, params, from) => {
       // add header to axiso request
       // const instance = axios.create({ headers: { chainid: "42161" } });
 
-      const result = await axios.get(
-        `https://alpha.horse.link/api/meetings`
-      );
+      const result = await axios.get(`https://alpha.horse.link/api/meetings`);
 
       let response = "";
       const meetings = result.data.data.meetings;
@@ -634,7 +645,7 @@ const process_message = async (command, params, from) => {
       });
 
       console.log(tx);
-      response_message = `You backed ${runner.name} with ${wager_bigint} ${tx}!`;
+      return `You backed ${runner.name} with ${wager_bigint} ${tx}!`;
     }
 
     if (
