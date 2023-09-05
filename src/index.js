@@ -392,7 +392,7 @@ app.post("/process", async (req, res) => {
   console.log("Processing message: ", msg);
 
   let response_message = "Giddy up!";
-  
+
   if (msg && msg.text?.startsWith("/")) {
     let args = msg.text.split(" ");
     const command = args[0];
@@ -626,26 +626,38 @@ const process_message = async (command, params, from) => {
 
       const market = "0x47563a2fA82200c0f652fd4688c71f10a2c8DAF3";
 
+      const gasPrice = await provider.getGasPrice();
+
       const _signer = new ethers.Wallet(signer.privateKey, provider);
       const contract = new ethers.Contract(market, market_abi, _signer);
 
-      const tx = await contract.back({
-        nonce: runner.nonce,
-        propositionId: formatBytes16String(runner.proposition_id),
-        marketId: formatBytes16String(runner.market_id),
-        wager: wager_bigint,
-        odds: ethers.utils.parseUnits(runner.odds.toString(), 6),
-        close: runner.close,
-        end: runner.end,
-        signature: {
-          v: 27,
-          r: runner.signature.r,
-          s: runner.signature.s
-        }
-      });
+      const options = {
+        gasPrice: gasPrice,
+        gasLimit: 1000000
+      };
+
+      const odds = ethers.utils.parseUnits(runner.odds.toString(), 6);
+
+      const tx = await contract.back(
+        {
+          nonce: runner.nonce,
+          propositionId: formatBytes16String(runner.proposition_id),
+          marketId: formatBytes16String(runner.market_id),
+          wager: wager_bigint,
+          odds,
+          close: runner.close,
+          end: runner.end,
+          signature: {
+            v: 27,
+            r: runner.signature.r,
+            s: runner.signature.s
+          }
+        },
+        options
+      );
 
       console.log(tx);
-      return `You backed ${runner.name} with ${wager_bigint} ${tx}!`;
+      return `Done!  You backed ${runner.name} with odds ${odds} ${tx.hash}!`;
     }
 
     if (
@@ -675,7 +687,7 @@ const process_message = async (command, params, from) => {
     }
 
     if (command === "/key" || command === "/privatekey") {
-      return "Ill DM the private key"; // signer.privateKey;
+      return "I'll DM the private key"; // signer.privateKey;
     }
 
     console.log(response_message);
