@@ -490,9 +490,8 @@ const process_message = async (command, params, from) => {
     }
 
     if (command === "/allow" || command === "/approve") {
-
       const gasPrice = await provider.getGasPrice();
-      
+
       const options = {
         gasPrice: gasPrice,
         gasLimit: 1000000
@@ -676,6 +675,13 @@ const process_message = async (command, params, from) => {
         return "Please provide all parameters Amount Recipient";
       }
 
+      const gasPrice = await provider.getGasPrice();
+
+      const options = {
+        gasPrice: gasPrice,
+        gasLimit: 1000000
+      };
+
       const token =
         process.env.TOKEN || "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9";
 
@@ -689,7 +695,7 @@ const process_message = async (command, params, from) => {
       }
 
       const to = params[1];
-      const tx = await erc20.transfer(to, amount);
+      const tx = await erc20.transfer(to, amount, options);
       return `Done! The transaction hash is ${tx.hash}`;
     }
 
